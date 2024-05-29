@@ -1,14 +1,63 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import InputBox from '../components/input.component'
 import googleIcon from '../imgs/google.png'
 import { Link } from 'react-router-dom'
 import AnimationWrapper from '../common/page-animation'
 
 const UserAuthForm = ({ type }) => {
+
+    const authForm = useRef()
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+
+        let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
+        const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
+
+        //  formData
+        let form = new FormData(authForm.current)
+
+        let formData = {}
+
+        for (let [key, value] of form.entries()) {
+            formData[key] = value
+        }
+        console.log(formData);
+
+        let { fullname, email, password } = formData;
+
+        // Validating the data from frontend
+        if (fullname) {
+            if (fullname.length < 3) {
+                return console.log({
+                    'error': "Fullname must be graterthan 3 letter"
+                })
+            }
+        }
+
+        if (!email.length) {
+            return console.log({
+                'error': "Email is required"
+            })
+        }
+
+        if (!emailRegex.test(email)) {
+            return console.log({
+                'error': "Invalid email"
+            })
+        }
+
+        if (!passwordRegex.test(password)) {
+            return console.log({
+                'error': "Password should be 6 to 20 charecters long with numaric, 1 lowercase and 1 uppercase lettes"
+            })
+        }
+    }
+
     return (
         <AnimationWrapper keyValue={type}>
             <section className='h-cover flex items-center justify-center'>
-                <form action="" className='w-[80%] max-w-[400px]'>
+                <form ref={authForm} className='w-[80%] max-w-[400px]'>
                     <h1 className='text-4xl font-gelasio capitalize text-center mb-8'>
                         {type === "sign-in" ? "Welcome back" : "Join us today"}
                     </h1>
@@ -31,7 +80,9 @@ const UserAuthForm = ({ type }) => {
                         icon='fi-rr-key'
                     />
 
-                    <button className='btn-dark text-lg center mt-6 capitalize'>
+                    <button
+                        onClick={handleSubmit}
+                        className='btn-dark text-lg center mt-6 capitalize'>
                         {type.replace("-", " ")}
                     </button>
 
