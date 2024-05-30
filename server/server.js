@@ -4,9 +4,18 @@ import 'dotenv/config';
 import bcrypt from 'bcrypt';
 import { nanoid } from 'nanoid';
 import jwt from 'jsonwebtoken';
+import cors from 'cors';
+import admin from 'firebase-admin'
+import serviceAccountKey from './mern-blog-website-master-firebase-adminsdk-i8cws-0cccab8cf8.json' assert { type: 'json' };
+
+import { getAuth } from 'firebase-admin/auth'
 
 const server = express();
 const PORT = 3000;
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccountKey)
+})
 
 // Schemas below
 import User from './Schema/User.js'
@@ -16,6 +25,7 @@ const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for pa
 
 // Middleware to parse JSON bodies
 server.use(express.json());
+server.use(cors());
 
 // Check if DB_LOCATION is provided
 if (!process.env.DB_LOCATION) {
@@ -122,6 +132,7 @@ server.post('/signup', (req, res) => {
 
 });
 
+// Sign in endpoint
 server.post('/signin', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -140,9 +151,46 @@ server.post('/signin', async (req, res) => {
 
         // Format and send the user data
         return res.status(200).json(formatDataToSend(user));
+
     } catch (err) {
         console.error('Error during signin:', err);
         return res.status(500).json({ "error": "Internal server error" });
+    }
+});
+
+
+server.post('/google-auth', async (req, res) => {
+    try {
+        const { access_token } = req.body;
+        const decodedUser = await getAuth().verifyIdToken(access_token);
+        const { email, picture, name } = decodedUser;
+        let user = await User.findOne({ "personal_info.email": email }).select("personal_info.fullname personal_info.username personal_info.profile_img google_auth");
+
+        if (user) {
+            if (!user.google_auth) {
+                return res.status(403).json({
+                    'error': "This email was signed up with Google. Please log in with password to access account"
+                });
+            }
+        } else {
+            const username = await genrateUsername(email);
+            user = new User({
+                personal_info: {
+                    fullname: name,
+                    email,
+                    profile_img: picture.replace("s96-c", "s384-c"),
+                    username
+                },
+                google_auth: true
+            });
+
+            await user.save();
+        }
+
+        return res.status(200).json(formatDataToSend(user));
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ 'error': err.message });
     }
 });
 
