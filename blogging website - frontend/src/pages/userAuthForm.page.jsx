@@ -81,9 +81,9 @@ const UserAuthForm = ({ type }) => {
             const user = await authWithGoogle();
             const serverRoute = "/google-auth";
             const formData = {
-                access_token: user.access_token
+                access_token: user.accessToken
             };
-
+            console.log(user);
             await userAuthThroughserver(serverRoute, formData);
         } catch (err) {
             toast.error('Login failed');

@@ -5,22 +5,22 @@ import bcrypt from 'bcrypt';
 import { nanoid } from 'nanoid';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
-import admin from 'firebase-admin'
+import admin from 'firebase-admin';
 import serviceAccountKey from './mern-blog-website-master-firebase-adminsdk-i8cws-0cccab8cf8.json' assert { type: 'json' };
 
-import { getAuth } from 'firebase-admin/auth'
+import { getAuth } from 'firebase-admin/auth';
 
 const server = express();
 const PORT = 3000;
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccountKey)
-})
+});
 
 // Schemas below
-import User from './Schema/User.js'
+import User from './Schema/User.js';
 
-let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
+const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
 // Middleware to parse JSON bodies
@@ -44,20 +44,16 @@ mongoose.connect(process.env.DB_LOCATION, {
         process.exit(1);
     });
 
-
-
 const formatDataToSend = (user) => {
-
-    const access_token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY)
-
+    const access_token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
     return {
         access_token,
         profile_img: user.personal_info.profile_img,
         username: user.personal_info.username,
         fullname: user.personal_info.fullname,
         email: user.personal_info.email,
-    }
-}
+    };
+};
 
 // Function to generate a unique username based on email
 const genrateUsername = async (email) => {
@@ -72,64 +68,63 @@ const genrateUsername = async (email) => {
 };
 
 server.post('/signup', (req, res) => {
-    let { fullname, email = undefined, password } = req.body;
+    const { fullname, email, password } = req.body;
 
     // Validating the data from frontend
     if (fullname.length < 3) {
         return res.status(403).json({
-            'error': "Fullname must be graterthan 3 letter"
-        })
+            'error': "Fullname must be greater than 3 letters"
+        });
     }
 
-    if (!email.length) {
+    if (!email || !email.length) {
         return res.status(403).json({
             'error': "Email is required"
-        })
+        });
     }
 
     if (!emailRegex.test(email)) {
         return res.status(403).json({
             'error': "Invalid email"
-        })
+        });
     }
 
     if (!passwordRegex.test(password)) {
         return res.status(403).json({
-            'error': "Password should be 6 to 20 charecters long with numaric, 1 lowercase and 1 uppercase lettes"
-        })
+            'error': "Password should be 6 to 20 characters long with numeric, 1 lowercase and 1 uppercase letter"
+        });
     }
 
     bcrypt.hash(password, 10, async (err, hashed_password) => {
         if (err) {
             return res.status(500).json({
                 'error': "Internal server error"
-            })
+            });
         }
 
-        let username = await genrateUsername(email);
+        const username = await genrateUsername(email);
 
-        let user = new User({
+        const user = new User({
             personal_info: {
                 fullname,
                 email,
                 password: hashed_password,
                 username
             }
-        })
+        });
         user.save().then((u) => {
-            return res.status(200).json(formatDataToSend(u))
+            return res.status(200).json(formatDataToSend(u));
         }).catch((err) => {
             if (err.code === 11000) {
                 return res.status(403).json({
                     'error': "Email already exists"
-                })
+                });
             }
             return res.status(500).json({
                 'error': err.message
-            })
-        })
-    })
-
+            });
+        });
+    });
 });
 
 // Sign in endpoint
@@ -158,12 +153,16 @@ server.post('/signin', async (req, res) => {
     }
 });
 
-
 server.post('/google-auth', async (req, res) => {
     try {
         const { access_token } = req.body;
+
+        // Verify the ID token using Firebase Admin SDK
         const decodedUser = await getAuth().verifyIdToken(access_token);
         const { email, picture, name } = decodedUser;
+
+        console.log("Decoded user:", decodedUser);
+
         let user = await User.findOne({ "personal_info.email": email }).select("personal_info.fullname personal_info.username personal_info.profile_img google_auth");
 
         if (user) {
@@ -189,13 +188,11 @@ server.post('/google-auth', async (req, res) => {
 
         return res.status(200).json(formatDataToSend(user));
     } catch (err) {
-        console.error(err);
+        console.error("Google Auth Error:", err);
         return res.status(500).json({ 'error': err.message });
     }
 });
 
-
 server.listen(PORT, () => {
     console.log('Server started on port ' + PORT);
 });
-
