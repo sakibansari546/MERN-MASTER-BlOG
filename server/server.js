@@ -8,6 +8,8 @@ import cors from 'cors';
 import admin from 'firebase-admin';
 import serviceAccountKey from './mern-blog-website-master-firebase-adminsdk-i8cws-0cccab8cf8.json' assert { type: 'json' };
 
+import aws from 'aws-sdk';
+
 import { getAuth } from 'firebase-admin/auth';
 
 const server = express();
@@ -38,11 +40,43 @@ mongoose.connect(process.env.DB_LOCATION, {
     autoIndex: true,
 }).then(() => {
     console.log('Connected to MongoDB');
+}).catch(error => {
+    console.error('Error connecting to MongoDB:', error);
+    process.exit(1);
+});
+
+
+// Satrting with S3 Bucket
+const s3 = new aws.S3({
+    region: "eu-north-1",
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 })
-    .catch(error => {
-        console.error('Error connecting to MongoDB:', error);
-        process.exit(1);
+
+const generateImgUploadURL = async () => {
+    const date = new Date();
+    const imageName = `${nanoid()}-${date.getTime()}.jpeg`;
+
+    return await s3.getSignedUrlPromise('putObject', {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        ContentType: 'image/jpeg',
+        Key: imageName,
+        Expires: 1000,
     });
+}
+
+// Upload Image url root
+server.get('/get-upload-url', async (req, res) => {
+    try {
+        const url = await generateImgUploadURL();
+        res.status(200).json({ uploadURL: url });
+    } catch (error) {
+        res.status(400).json({ "error": error });
+    }
+});
+
+
+
 
 const formatDataToSend = (user) => {
     const access_token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
@@ -128,6 +162,7 @@ server.post('/signup', (req, res) => {
 });
 
 // Sign in endpoint
+// Sign in endpoint
 server.post('/signin', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -136,6 +171,11 @@ server.post('/signin', async (req, res) => {
         const user = await User.findOne({ "personal_info.email": email });
         if (!user) {
             return res.status(403).json({ "error": "Email not found" });
+        }
+
+        // Check if the user signed up with Google
+        if (user.google_auth) {
+            return res.status(403).json({ "error": "This email was signed up with Google. Please log in with Google" });
         }
 
         // Compare the provided password with the stored hashed password
@@ -152,6 +192,7 @@ server.post('/signin', async (req, res) => {
         return res.status(500).json({ "error": "Internal server error" });
     }
 });
+
 
 server.post('/google-auth', async (req, res) => {
     try {
