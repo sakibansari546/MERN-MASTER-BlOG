@@ -16,7 +16,7 @@ const BlogEditor = () => {
     useEffect(() => {
         setTextEditor(new EditorJS({
             holder: 'textEditor',
-            data: '',
+            data: content,
             placeholder: "Let's write an awesome story!",
             tools: tools,
         }));
@@ -66,7 +66,7 @@ const BlogEditor = () => {
             return toast.error("Upload a Blog Banner to publish it")
         }
         if (!title.length) {
-            return toast.error("Write BLog Title to publish it")
+            return toast.error("Write Blog Title to publish it")
         }
 
         if (textEditor.isReady) {
@@ -77,7 +77,7 @@ const BlogEditor = () => {
                 } else {
                     return toast.error("Write something in your Blog to publish it")
                 }
-                // console.log(outputData);
+                console.log(outputData);
             }).catch(error => {
                 console.log('Saving failed: ', error);
             });
@@ -129,6 +129,7 @@ const BlogEditor = () => {
                             </label>
                         </div>
                         <textarea
+                            defaultValue={title}
                             placeholder='Blog Title'
                             className='text-4xl font-medium w-full h-20 outline-none resize-none mt-10 leading-tight placeholder:opacity-40'
                             onKeyDown={handleTitleKeyDown}
