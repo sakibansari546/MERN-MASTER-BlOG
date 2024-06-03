@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import logo from '../imgs/logo.png'
 import defaultBanner from '../imgs/blog banner.png'
@@ -6,9 +6,22 @@ import AnimationWrapper from '../common/page-animation'
 import { uploadImage } from '../common/aws'
 import { Toaster, toast } from 'react-hot-toast'
 import { EditorContext } from '../pages/editor.pages'
+import EditorJS from '@editorjs/editorjs';
+import { tools } from './tools.component';
 
 const BlogEditor = () => {
-    let { blog, blog: { title, banner, content, des, tags }, setBlog } = useContext(EditorContext);
+    let { blog, blog: { title, banner, content, des, tags }, setBlog, textEditor, setTextEditor, setEditorState } = useContext(EditorContext);
+
+    // userEffect
+    useEffect(() => {
+        setTextEditor(new EditorJS({
+            holder: 'textEditor',
+            data: '',
+            placeholder: "Let's write an awesome story!",
+            tools: tools,
+        }));
+    }, []);
+
 
     const handleBannerUpload = (e) => {
         let img = e.target.files[0];
@@ -48,6 +61,30 @@ const BlogEditor = () => {
         img.src = defaultBanner;
     }
 
+    const handlePublishEvent = () => {
+        if (!banner.length) {
+            return toast.error("Upload a Blog Banner to publish it")
+        }
+        if (!title.length) {
+            return toast.error("Write BLog Title to publish it")
+        }
+
+        if (textEditor.isReady) {
+            textEditor.save().then((outputData) => {
+                if (outputData.blocks.length) {
+                    setBlog({ ...blog, content: outputData });
+                    setEditorState('publish')
+                } else {
+                    return toast.error("Write something in your Blog to publish it")
+                }
+                // console.log(outputData);
+            }).catch(error => {
+                console.log('Saving failed: ', error);
+            });
+        }
+
+    }
+
     return (
         <>
             <Toaster />
@@ -60,7 +97,8 @@ const BlogEditor = () => {
                 </p>
 
                 <div className='flex gap-4 ml-auto '>
-                    <button className='btn-dark py-2 text-xl'>
+                    <button className='btn-dark py-2 text-xl'
+                        onClick={handlePublishEvent} >
                         Publish
                     </button>
                     <button className='btn-light py-2 text-xl'>
@@ -101,7 +139,7 @@ const BlogEditor = () => {
                         <hr className='w-full opacity-10 my-5' />
 
                         <div id="textEditor" className='font-gelasio' >
-                            
+
                         </div>
 
                     </div>

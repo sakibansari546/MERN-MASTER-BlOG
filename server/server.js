@@ -6,7 +6,7 @@ import { nanoid } from 'nanoid';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import admin from 'firebase-admin';
-import serviceAccountKey from './mern-blog-website-master-firebase-adminsdk-i8cws-0cccab8cf8.json' assert { type: 'json' };
+import serviceAccountKey from './config/mern-blog-website-master-firebase-adminsdk-i8cws-0cccab8cf8.json' assert { type: 'json' };
 
 import aws from 'aws-sdk';
 
@@ -28,6 +28,14 @@ const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for pa
 // Middleware to parse JSON bodies
 server.use(express.json());
 server.use(cors());
+server.use((req, res, next) => {
+    res.cookie('yourCookie', 'cookieValue', {
+        httpOnly: true,
+        secure: true, // Ensures the cookie is sent over HTTPS
+        sameSite: 'None' // Ensures the cookie is sent with cross-site requests
+    });
+    next();
+});
 
 // Check if DB_LOCATION is provided
 if (!process.env.DB_LOCATION) {
