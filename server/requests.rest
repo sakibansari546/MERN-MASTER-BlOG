@@ -8,7 +8,7 @@
 # }
 # eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NWU2MDJkYzVhMThmZWMzMDQ3YmIzZCIsImlhdCI6MTcxNzQ2MTAzN30.xpwTzklj3wK3fQGb32Twdzktg-Yw9dq321a1wYBqchE
 
-GET http://localhost:3000/latest-blogs
+GET http://localhost:3000/trending-blogs
 
 # POST http://localhost:3000/create-blog
 # Content-Type: application/json
