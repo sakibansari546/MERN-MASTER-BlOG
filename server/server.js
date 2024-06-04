@@ -273,17 +273,20 @@ server.post('/create-blog', verifyJWT, (req, res) => {
     if (!title.length) {
         return res.status(403).json({ 'error': "Title is required" });
     }
-    if (!tags.length) {
-        return res.status(403).json({ 'error': "Tags are required" });
-    }
-    if (!des.length || des.length > 200) {
-        return res.status(403).json({ 'error': "Description is required under 200 charecter" });
-    }
-    if (!banner.length) {
-        return res.status(403).json({ 'error': "Blog Banner is required" });
-    }
-    if (!content.blocks.length) {
-        return res.status(403).json({ 'error': "There must be some content to publish it" });
+
+    if (!draft) {
+        if (!tags.length) {
+            return res.status(403).json({ 'error': "Tags are required" });
+        }
+        if (!des.length || des.length > 200) {
+            return res.status(403).json({ 'error': "Description is required under 200 charecter" });
+        }
+        if (!banner.length) {
+            return res.status(403).json({ 'error': "Blog Banner is required" });
+        }
+        if (!content.blocks.length) {
+            return res.status(403).json({ 'error': "There must be some content to publish it" });
+        }
     }
 
     tags = tags.map(tag => tag.toLowerCase());
