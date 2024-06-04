@@ -1,9 +1,27 @@
-# POST http://localhost:3000/signin 
+# POST http://localhost:3000/signup 
 # Content-Type: application/json
 
 # {
+#     "fullname" :"sakib",
 #     "email" : "sakib@yahooo.com",
 #     "password" : "Sakib1335n"
 # }
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NWU2MDJkYzVhMThmZWMzMDQ3YmIzZCIsImlhdCI6MTcxNzQ2MTAzN30.xpwTzklj3wK3fQGb32Twdzktg-Yw9dq321a1wYBqchE
 
-GET http://localhost:3000/get-upload-url
+# GET http://localhost:3000/get-upload-url
+
+POST http://localhost:3000/create-blog
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NWU2MDJkYzVhMThmZWMzMDQ3YmIzZCIsImlhdCI6MTcxNzQ2MTAzN30.xpwTzklj3wK3fQGb32Twdzktg-Yw9dq321a1wYBqchE
+
+{
+    "title" : "This is a blog $5## @ 123",
+    "banner": "https://cdn.pixabay.com/photo/2024/01/12/17/01/leaves-8504392_1280.jpg",
+    "des": "desx",
+    "content" : {
+        "blocks": {
+            "data":["one","two"]
+        }
+    },
+    "tags":["tag1","tga2"]
+}
