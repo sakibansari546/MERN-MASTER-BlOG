@@ -294,7 +294,7 @@ server.get('/trending-blogs', (req, res) => {
 })
 
 // Search blog route
-server.post('/search-blog', (req, res) => {
+server.post('/search-blogs', (req, res) => {
     let { tag } = req.body;
     let findQuery = { tags: tag.toLowerCase(), draft: false };
     let maxLimit = 5;
