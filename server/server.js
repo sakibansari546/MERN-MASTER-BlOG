@@ -279,13 +279,30 @@ server.get('/latest-blogs', (req, res) => {
             return res.status(500).json({ 'error': err.message });
         })
 })
-
+// fins trending blogs
 server.get('/trending-blogs', (req, res) => {
     Blog.find({ 'draft': false })
         .populate('author', "personal_info.username personal_info.fullname personal_info.profile_img -_id")
         .sort({ 'activity.total_reads': -1, "activity.total_likes": -1, "publishedAt": -1 })
         .select("blog_id title publishedAt -_id")
         .limit(5)
+        .then(blogs => {
+            return res.status(200).json({ blogs });
+        }).catch(err => {
+            return res.status(500).json({ 'error': err.message });
+        })
+})
+
+// Search blog route
+server.post('/search-blog', (req, res) => {
+    let { tag } = req.body;
+    let findQuery = { tags: tag.toLowerCase(), draft: false };
+    let maxLimit = 5;
+    Blog.find(findQuery)
+        .populate('author', "personal_info.username personal_info.fullname personal_info.profile_img -_id")
+        .sort({ 'publishedAt': -1 })
+        .select("blog_id title des banner activity tags publishedAt -_id")
+        .limit(maxLimit)
         .then(blogs => {
             return res.status(200).json({ blogs });
         }).catch(err => {
