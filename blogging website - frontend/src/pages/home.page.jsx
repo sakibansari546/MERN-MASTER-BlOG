@@ -4,9 +4,11 @@ import InPageNavigation from '../components/inpage-navigation.component'
 import axios from 'axios'
 import Loader from '../components/loader.component'
 import BlogPostCard from '../components/blog-post.component'
+import MinimalBlogPost from '../components/nobanner-blog-post.component'
 
 const HomePage = () => {
     let [blog, setBlog] = useState(null);
+    let [trendingBlog, setTrendingBlog] = useState(null);
 
     const fetchLatestBlogs = () => {
         axios.get('http://localhost:3000/latest-blogs')
@@ -15,8 +17,16 @@ const HomePage = () => {
             })
     }
 
+    const fetchTrendingtBlogs = () => {
+        axios.get('http://localhost:3000/trending-blogs')
+            .then(({ data }) => {
+                setTrendingBlog(data.blogs)
+            })
+    }
+
     useEffect(() => {
         fetchLatestBlogs();
+        fetchTrendingtBlogs();
     }, [])
 
     return (
@@ -38,15 +48,20 @@ const HomePage = () => {
                                         })
                                 }
                             </>
-                            <h1>Trending Blogs</h1>
+                            <>
+                                {
+                                    trendingBlog === null ? <Loader /> :
+                                        trendingBlog.map((trendingBlog, i) => {
+                                            return (
+                                                <AnimationWrapper transition={{ duration: 1, delay: i * .1 }}>
+                                                    <MinimalBlogPost content={trendingBlog} author={trendingBlog.author.personal_info} index={i} />
+                                                </AnimationWrapper>
+                                            )
+                                        })
+                                }
+                            </>
                         </InPageNavigation>
                     </div>
-
-                    {/* fillters and trending Bsogs */}
-                    <div>
-
-                    </div>
-
                 </section>
             </AnimationWrapper>
         </>
