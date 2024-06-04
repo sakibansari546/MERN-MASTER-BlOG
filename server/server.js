@@ -131,7 +131,7 @@ const genrateUsername = async (email) => {
     }
     return username;
 };
-
+// signUp Route
 server.post('/signup', (req, res) => {
     const { fullname, email, password } = req.body;
 
@@ -192,7 +192,7 @@ server.post('/signup', (req, res) => {
     });
 });
 
-// Sign in endpoint
+
 // Sign in endpoint
 server.post('/signin', async (req, res) => {
     try {
@@ -224,7 +224,7 @@ server.post('/signin', async (req, res) => {
     }
 });
 
-
+// google auth Route
 server.post('/google-auth', async (req, res) => {
     try {
         const { access_token } = req.body;
@@ -265,7 +265,22 @@ server.post('/google-auth', async (req, res) => {
     }
 });
 
+// find latest blogs Route
+server.get('/latest-blogs', (req, res) => {
+    let maxLimit = 5;
+    Blog.find({ 'draft': false })
+        .populate('author', "personal_info.username personal_info.fullname personal_info.profile_img -_id")
+        .sort({ 'publishedAt': -1 })
+        .select("blog_id title des banner activity tags publishedAt -_id")
+        .limit(maxLimit)
+        .then(blogs => {
+            return res.status(200).json({ blogs });
+        }).catch(err => {
+            return res.status(500).json({ 'error': err.message });
+        })
+})
 
+// create blog route
 server.post('/create-blog', verifyJWT, (req, res) => {
     let authorId = req.user;
     let { title, banner, content, tags, des, draft } = req.body;
