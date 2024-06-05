@@ -1,8 +1,8 @@
-POST http://localhost:3000/search-user
+POST http://localhost:3000/get-profile
 Content-Type: application/json
 
 {
-    "query": "sakib"
+    "username": "sakib"
 }
 
 # GET http://localhost:3000/trending-blogs
