@@ -1,4 +1,4 @@
-POST http://localhost:3000/search-blog
+POST http://localhost:3000/latest-blogs
 Content-Type: application/json
 
 {

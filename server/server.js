@@ -266,19 +266,36 @@ server.post('/google-auth', async (req, res) => {
 });
 
 // find latest blogs Route
-server.get('/latest-blogs', (req, res) => {
+// Route to find latest blogs
+server.post('/latest-blogs', (req, res) => {
+    let { page = 1 } = req.body; // Default to page 1 if not provided
+
     let maxLimit = 5;
     Blog.find({ 'draft': false })
         .populate('author', "personal_info.username personal_info.fullname personal_info.profile_img -_id")
         .sort({ 'publishedAt': -1 })
         .select("blog_id title des banner activity tags publishedAt -_id")
+        .skip((page - 1) * maxLimit)
         .limit(maxLimit)
         .then(blogs => {
             return res.status(200).json({ blogs });
-        }).catch(err => {
-            return res.status(500).json({ 'error': err.message });
         })
-})
+        .catch(err => {
+            return res.status(500).json({ 'error': err.message });
+        });
+});
+
+// Route to get the count of all latest blogs
+server.post('/all-latest-blogs-count', (req, res) => {
+    Blog.countDocuments({ draft: false })
+        .then(count => {
+            return res.status(200).json({ totalDocs: count });
+        })
+        .catch(err => {
+            return res.status(500).json({ 'error': err.message });
+        });
+});
+
 // fins trending blogs
 server.get('/trending-blogs', (req, res) => {
     Blog.find({ 'draft': false })
@@ -295,16 +312,29 @@ server.get('/trending-blogs', (req, res) => {
 
 // Search blog route
 server.post('/search-blogs', (req, res) => {
-    let { tag } = req.body;
+    let { tag, page } = req.body;
     let findQuery = { tags: tag.toLowerCase(), draft: false };
-    let maxLimit = 5;
+    let maxLimit = 2;
     Blog.find(findQuery)
         .populate('author', "personal_info.username personal_info.fullname personal_info.profile_img -_id")
         .sort({ 'publishedAt': -1 })
         .select("blog_id title des banner activity tags publishedAt -_id")
+        .skip((page - 1) * maxLimit)
         .limit(maxLimit)
         .then(blogs => {
             return res.status(200).json({ blogs });
+        }).catch(err => {
+            return res.status(500).json({ 'error': err.message });
+        })
+})
+
+server.post('/search-blogs-count', (req, res) => {
+    let { tag } = req.body;
+    let findQuery = { tags: tag.toLowerCase(), draft: false };
+
+    Blog.countDocuments(findQuery)
+        .then(count => {
+            return res.status(200).json({ totalDocs: count });
         }).catch(err => {
             return res.status(500).json({ 'error': err.message });
         })
