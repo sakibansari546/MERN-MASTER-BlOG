@@ -312,8 +312,14 @@ server.get('/trending-blogs', (req, res) => {
 
 // Search blog route
 server.post('/search-blogs', (req, res) => {
-    let { tag, page } = req.body;
-    let findQuery = { tags: tag.toLowerCase(), draft: false };
+    let { tag, page, query } = req.body;
+    let findQuery;
+    if (tag) {
+        findQuery = { tags: tag.toLowerCase(), draft: false };
+    } else if (query) {
+        findQuery = { draft: false, title: new RegExp(query, 'i') };
+    }
+
     let maxLimit = 2;
     Blog.find(findQuery)
         .populate('author', "personal_info.username personal_info.fullname personal_info.profile_img -_id")
@@ -329,16 +335,25 @@ server.post('/search-blogs', (req, res) => {
 })
 
 server.post('/search-blogs-count', (req, res) => {
-    let { tag } = req.body;
-    let findQuery = { tags: tag.toLowerCase(), draft: false };
+    let { tag, query } = req.body;
+
+    let findQuery = { draft: false };
+
+    if (tag) {
+        findQuery.tags = tag.toLowerCase();
+    } else if (query) {
+        findQuery.title = new RegExp(query, 'i');
+    }
 
     Blog.countDocuments(findQuery)
         .then(count => {
             return res.status(200).json({ totalDocs: count });
-        }).catch(err => {
-            return res.status(500).json({ 'error': err.message });
         })
-})
+        .catch(err => {
+            return res.status(500).json({ 'error': err.message });
+        });
+});
+
 
 // create blog route
 server.post('/create-blog', verifyJWT, (req, res) => {

@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react'
 
 const InputBox = ({ name, type, id, value, placeholder, icon }) => {
     const [passwordVisibile, setPasswordVisibile] = useState(false);
+    
 
     return (
         <div className="relative w-[100%] mb-4">
