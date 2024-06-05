@@ -1,8 +1,8 @@
-POST http://localhost:3000/latest-blogs
+POST http://localhost:3000/search-user
 Content-Type: application/json
 
 {
-    "tag": "test"
+    "query": "sakib"
 }
 
 # GET http://localhost:3000/trending-blogs
