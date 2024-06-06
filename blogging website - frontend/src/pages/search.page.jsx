@@ -40,7 +40,7 @@ const SearchPage = () => {
         axios.post('http://localhost:3000/search-users', { query })
             .then(({ data: { users } }) => {
                 setUsers(users)
-                console.log(users);
+                // console.log(users);
             })
     }
 
@@ -79,7 +79,7 @@ const SearchPage = () => {
     return (
         <section className='h-cover flex justify-center gap-10'>
             <div className='w-full '>
-                <InPageNavigation routes={[`Search Results from ${query}`, `Accounts Matched`]} defaultHidden={["Accounts Matched"]}>
+                <InPageNavigation routes={[`Search Results from "${query}"`, `Accounts Matched`]} defaultHidden={["Accounts Matched"]}>
                     <>
                         {
                             blog === null ? (<Loader />) :

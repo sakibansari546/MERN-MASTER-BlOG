@@ -149,11 +149,11 @@ const BlogEditor = () => {
                 </p>
 
                 <div className='flex gap-4 ml-auto '>
-                    <button className='btn-dark py-2 text-xl'
+                    <button className='btn-dark py-2 text-sm sm:text-xl'
                         onClick={handlePublishEvent} >
                         Publish
                     </button>
-                    <button className='btn-light py-2 text-xl'
+                    <button className='btn-light py-2 text-sm sm:text-xl'
                         onClick={handleSaveDraft}
                     >
                         Save Draft

@@ -312,12 +312,14 @@ server.get('/trending-blogs', (req, res) => {
 
 // Search blog route
 server.post('/search-blogs', (req, res) => {
-    let { tag, page, query } = req.body;
+    let { tag, page, author, query } = req.body;
     let findQuery;
     if (tag) {
         findQuery = { tags: tag.toLowerCase(), draft: false };
     } else if (query) {
         findQuery = { draft: false, title: new RegExp(query, 'i') };
+    } else if (author) {
+        findQuery = { draft: false, author: author }
     }
 
     let maxLimit = 2;
@@ -335,7 +337,7 @@ server.post('/search-blogs', (req, res) => {
 })
 
 server.post('/search-blogs-count', (req, res) => {
-    let { tag, query } = req.body;
+    let { tag, author, query } = req.body;
 
     let findQuery = { draft: false };
 
@@ -343,6 +345,8 @@ server.post('/search-blogs-count', (req, res) => {
         findQuery.tags = tag.toLowerCase();
     } else if (query) {
         findQuery.title = new RegExp(query, 'i');
+    } else if (author) {
+        findQuery = { draft: false, author: author }
     }
 
     Blog.countDocuments(findQuery)
@@ -371,7 +375,7 @@ server.post('/get-profile', (req, res) => {
     let { username } = req.body;
 
     User.findOne({ "personal_info.username": username })
-        .select("-personal_info.password -google_auth -updatedAt -blogs -_id")
+        .select("-personal_info.password -google_auth -updatedAt -blogs")
         .then(user => {
             return res.status(200).json(user);
         })

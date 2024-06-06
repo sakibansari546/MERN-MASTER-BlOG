@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
-import getDay from '../common/date';
+import { getDay } from '../common/date.jsx';
 
 const MinimalBlogPost = ({ content, author, index }) => {
     let { publishedAt, title, blog_id: id } = content;

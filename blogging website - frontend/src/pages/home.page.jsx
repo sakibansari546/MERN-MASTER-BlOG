@@ -94,7 +94,7 @@ const HomePage = () => {
             <AnimationWrapper>
                 <section className='h-cover flex justify-center gap-10'>
                     {/* Tatest Blogs */}
-                    <div className='w-full'>
+                    <div className='w-full sticky'>
                         <InPageNavigation routes={[pageState, 'trending blogs']} defaultHidden={['trending blogs']}>
                             <>
                                 {
