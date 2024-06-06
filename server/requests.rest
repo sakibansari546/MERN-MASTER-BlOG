@@ -1,8 +1,8 @@
-POST http://localhost:3000/get-profile
+POST http://localhost:3000/get-blog
 Content-Type: application/json
 
 {
-    "username": "sakib"
+    "blog_id": "kjdkfls-hWqA8BkeVev2a-C8dc85v"
 }
 
 # GET http://localhost:3000/trending-blogs

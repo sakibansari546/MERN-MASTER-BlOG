@@ -107,8 +107,6 @@ const verifyJWT = (req, res, next) => {
 };
 
 
-
-
 const formatDataToSend = (user) => {
     const access_token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
     return {
@@ -438,6 +436,27 @@ server.post('/create-blog', verifyJWT, (req, res) => {
 
 })
 
+// single blog route
+server.post('/get-blog', (req, res) => {
+    let { blog_id } = req.body;
+    let incrementVal = 1;
+    Blog.findOneAndUpdate({ blog_id }, { $inc: { 'activity.total_reads': incrementVal } })
+        .populate('author', "personal_info.username personal_info.fullname personal_info.profile_img -_id")
+        .select('title des content activity publihedAt blog_id tags')
+        .then(blog => {
+
+            User.findOneAndUpdate({ "personal_info.username": blog.author.personal_info.username }, {
+                $inc: { "account_info.total_reads": incrementVal }
+            }).catch(err => {
+                return res.status(500).json({ 'error': err.message });
+            })
+
+            return res.status(200).json({ blog });
+        })
+        .catch(err => {
+            return res.status(500).json({ 'error': err.message });
+        })
+})
 
 server.listen(PORT, () => {
     console.log('Server started on port ' + PORT);
