@@ -31,8 +31,6 @@ const BlogPage = () => {
         axios.post('http://localhost:3000/get-blog', { blog_id })
             .then(({ data: { blog } }) => {
                 setBlog(blog);
-                console.log(blog.content[0].blocks);
-
                 axios.post('http://localhost:3000/search-blogs', { tag: blog.tags[0], limit: 6, eliminate_blog: blog_id }).
                     then(({ data }) => {
                         setSimilarBlogs(data.blogs);

@@ -43,7 +43,7 @@ const BlogContent = ({ block }) => {
 
     if (type === 'header') {
         if (data.level === 3) {
-            return <h3 className='text-xl' dangerouslySetInnerHTML={{ __html: data.text }}></h3>
+            return <h3 className='text-xl md:text-2xl font-semibold' dangerouslySetInnerHTML={{ __html: data.text }}></h3>
         }
         if (data.level === 2) {
             return <h2 dangerouslySetInnerHTML={{ __html: data.text }}></h2>
