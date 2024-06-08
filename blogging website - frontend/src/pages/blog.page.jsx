@@ -8,6 +8,7 @@ import BlogInteraction from '../components/blog-interaction.component';
 import MinimalBlogPost from '../components/nobanner-blog-post.component';
 import BlogPostCard from '../components/blog-post.component';
 import BlogContent from '../components/blog-content.component';
+import CommentsContainer from '../components/comments.component';
 
 export const blogStructure = ({
     title: "",
@@ -25,6 +26,9 @@ const BlogPage = () => {
     let [blog, setBlog] = useState(blogStructure);
     let [simillarBlogs, setSimilarBlogs] = useState(null)
     let [isLikedByUser, setIsLikedByUser] = useState(false);
+    let [commentsWrapper, setCommentsWrapper] = useState(false);
+    let [lotalParentCommentLoaded, setLotalParentCommentLoaded] = useState(0)
+
     let { title, banner, content, author: { personal_info: { username: author_username, fullname, profile_img } }, publishedAt } = blog;
 
 
@@ -52,13 +56,19 @@ const BlogPage = () => {
         setBlog(blogStructure)
         setSimilarBlogs(null)
         setLoading(true)
+        setIsLikedByUser(false);
+        setCommentsWrapper(false);
+        setLotalParentCommentLoaded(0);
     }
 
     return (
         <AnimationWrapper>
             {
                 loading ? <Loader /> :
-                    <BlogContext.Provider value={{ blog, setBlog, isLikedByUser, setIsLikedByUser }}>
+                    <BlogContext.Provider value={{ blog, setBlog, isLikedByUser, setIsLikedByUser, commentsWrapper, setCommentsWrapper, lotalParentCommentLoaded, setLotalParentCommentLoaded }}>
+
+                        <CommentsContainer />
+
                         <div className='max-w-[900px] center py-10 max-lg:px-[5vw]'>
                             <img className='aspect-video' src={banner} alt="Blog Banner" />
 

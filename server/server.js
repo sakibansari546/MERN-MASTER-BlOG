@@ -23,6 +23,7 @@ admin.initializeApp({
 import User from './Schema/User.js';
 import Blog from './Schema/Blog.js';
 import Notification from './Schema/Notification.js';
+import Comment from './Schema/Comment.js';
 
 const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
@@ -461,7 +462,7 @@ server.post('/get-blog', (req, res) => {
     let incrementVal = mode != 'edit' ? 1 : 0;
 
     Blog.findOneAndUpdate({ blog_id }, { $inc: { 'activity.total_reads': incrementVal } })
-        .populate('author', "personal_info.username personal_info.fullname personal_info.profile_img -_id")
+        .populate('author', "personal_info.username personal_info.fullname personal_info.profile_img _id")
         .select('title des banner content activity publihedAt blog_id tags')
         .then(blog => {
 
@@ -522,6 +523,50 @@ server.post('/isliked-by-user', verifyJWT, (req, res) => {
         }).catch(err => {
             return res.status(500).json({ 'error': err.message });
         })
+
+})
+
+server.post('/add-comment', verifyJWT, (req, res) => {
+    let user_id = req.user;
+    let { _id, comment, replying_to, blog_author } = req.body;
+
+    if (!comment.length) {
+        return res.status(403).json({ 'error': "Write something to leave a comment" });
+    }
+
+    // createing a comment doc
+    let commentObj = new Comment({
+        blog_id: _id,
+        blog_author,
+        comment,
+        commented_by: user_id,
+    })
+
+    commentObj.save().then(commentFile => {
+        let { comment, commentedAt, children } = commentFile;
+        Blog.findOneAndUpdate({ _id }, { $push: { "comments": commentFile._id } }, { $inc: { "activity.total_comments": 1 }, "activity.total_parent_comments": 1 })
+            .then(blog => {
+                console.log('new BLog created');
+            }).catch(err => {
+                console.log(err);
+            })
+
+
+        let notificationOnj = {
+            type: 'comment',
+            blog: _id,
+            notification_for: blog_author,
+            user: user_id,
+            comment: commentFile._id
+        }
+
+        new Notification(notificationOnj).save()
+            .then(notification => {
+                console.log('new notifuication create');
+            })
+
+        return res.status(200).json({ comment, commentedAt, _id: commentFile._id, user_id, children });
+    })
 
 })
 

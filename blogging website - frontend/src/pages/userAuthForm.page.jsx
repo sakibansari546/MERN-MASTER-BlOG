@@ -83,7 +83,7 @@ const UserAuthForm = ({ type }) => {
             const formData = {
                 access_token: user.accessToken
             };
-            console.log(user);
+            // console.log(user);
             await userAuthThroughserver(serverRoute, formData);
         } catch (err) {
             toast.error('Login failed');
